@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zarvan-torch"
+version = "0.1.0"
+authors = [
+  { name="Yasser Sajjadi", email="yassersajjadi@gmail.com" },
+]
+description = "Zarvan: A novel neural network architecture for sequence understanding."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file="LICENSE" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.0.0",
+    "transformers>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/systbs/zarvan-torch"
+Issues = "https://github.com/systbs/zarvan-torch/issues"
