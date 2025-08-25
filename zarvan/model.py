@@ -2,7 +2,7 @@
 import math
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 import torch
 import torch.nn as nn
@@ -260,3 +260,49 @@ class Zarvan(nn.Module):
             
         model.eval() # Set to evaluation mode by default
         return model
+    
+    def get_input_embeddings(self) -> nn.Embedding:
+        """Returns the token embedding layer."""
+        return self.embedding
+
+    def set_input_embeddings(self, new_embeddings: nn.Embedding):
+        """Sets the token embedding layer."""
+        self.embedding = new_embeddings
+
+    def resize_token_embeddings(self, new_num_tokens: Optional[int] = None) -> nn.Embedding:
+        """
+        Resizes the input token embeddings matrix of the model and updates the config.
+        This is the method you'll use to add special tokens.
+
+        Args:
+            new_num_tokens (Optional[int]): The new number of tokens in the vocabulary.
+
+        Returns:
+            nn.Embedding: The resized embedding layer.
+        """
+        model_embeds = self.get_input_embeddings()
+        old_vocab_size, old_embed_dim = model_embeds.weight.size()
+
+        if new_num_tokens is None:
+            return model_embeds
+
+        if new_num_tokens == old_vocab_size:
+            return model_embeds
+
+        # Create a new embedding module with the new size
+        new_embeddings = nn.Embedding(new_num_tokens, old_embed_dim, device=model_embeds.weight.device)
+        
+        # Initialize new weights using the model's initializer
+        self._init_weights(new_embeddings)
+        
+        # Copy the old weights over
+        num_tokens_to_copy = min(old_vocab_size, new_num_tokens)
+        with torch.no_grad():
+            new_embeddings.weight[:num_tokens_to_copy, :] = model_embeds.weight[:num_tokens_to_copy, :]
+
+        # Update the model's embedding layer and config
+        self.set_input_embeddings(new_embeddings)
+        self.config.vocab_size = new_num_tokens
+        
+        print(f"Resized token embeddings from {old_vocab_size} to {new_num_tokens}.")
+        return self.get_input_embeddings()
